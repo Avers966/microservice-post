@@ -1,0 +1,86 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <!-- TABLES -->
+
+  <changeSet id="create-table-post" author="Marat Safagareev">
+    <createTable tableName="post">
+      <column name="id" type="uuid">
+        <constraints nullable="false" unique="true" primaryKey="true"/>
+      </column>
+      <column name="is_deleted" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_time" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="changed_time" type="timestamp with time zone">
+      </column>
+      <column name="author_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="title" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="post_text" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_blocked" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="comments_count" type="integer">
+      </column>
+      <column name="like_amount" type="integer">
+      </column>
+      <column name="my_like" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="image_path" type="varchar(255)">
+      </column>
+      <column name="publish_date" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="create-table-like" author="Marat Safagareev">
+    <createTable tableName="like">
+      <column name="id" type="uuid">
+        <constraints nullable="false" unique="true" primaryKey="true"/>
+      </column>
+      <column name="is_deleted" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="author_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_time" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <!-- END TABLES -->
+
+  <!-- INDEXES -->
+  <!-- END INDEXES -->
+
+  <!-- FOREIGN KEYS -->
+  <!-- END FOREIGN KEYS -->
+
+  <!-- SEQUENCES -->
+  <!-- EDN SEQUENCES -->
+
+</databaseChangeLog>
