@@ -19,29 +19,29 @@
       </column>
       <column name="changed_time" type="TIMESTAMP WITH TIME ZONE">
       </column>
-      <column name="author_id" type="uuid">
+      <column name="author_id" type="UUID">
         <constraints nullable="false"/>
       </column>
-      <column name="title" type="varchar(255)">
+      <column name="title" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>
-      <column name="type" type="varchar(255)">
+      <column name="type" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>
-      <column name="post_text" type="text">
+      <column name="post_text" type="TEXT">
         <constraints nullable="false"/>
       </column>
       <column name="is_blocked" type="boolean">
         <constraints nullable="false"/>
       </column>
-      <column name="comments_count" type="integer">
+      <column name="comments_count" type="INTEGER">
       </column>
-      <column name="like_amount" type="integer">
+      <column name="like_amount" type="INTEGER">
       </column>
       <column name="my_like" type="boolean">
         <constraints nullable="false"/>
       </column>
-      <column name="image_path" type="varchar(255)">
+      <column name="image_path" type="VARCHAR(255)">
       </column>
       <column name="publish_date" type="TIMESTAMP WITH TIME ZONE">
         <constraints nullable="false"/>
@@ -57,16 +57,16 @@
       <column name="is_deleted" type="boolean">
         <constraints nullable="false"/>
       </column>
-      <column name="author_id" type="uuid">
+      <column name="author_id" type="UUID">
         <constraints nullable="false"/>
       </column>
       <column name="created_time" type="TIMESTAMP WITH TIME ZONE">
         <constraints nullable="false"/>
       </column>
-      <column name="item_id" type="uuid">
+      <column name="item_id" type="UUID">
         <constraints nullable="false"/>
       </column>
-      <column name="type" type="varchar(255)">
+      <column name="type" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>
     </createTable>

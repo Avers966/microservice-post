@@ -24,8 +24,8 @@ import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 @RequiredArgsConstructor
 public class PostControllerImpl implements PostController {
 
-  private final PostService postService;
   final CommentService commentService;
+  private final PostService postService;
 
   @Override
   public ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable) {
@@ -34,7 +34,7 @@ public class PostControllerImpl implements PostController {
 
   @Override
   public ResponseEntity<PostDto> getById(UUID id) {
-    log.info("getById(): PostUUID :{}", id);
+    log.info("getById(): PostId :{}", id);
     return (postService.getById(id) != null) ? ResponseEntity.ok(postService.getById(id))
         : ResponseEntity.badRequest().build();
   }
@@ -54,34 +54,35 @@ public class PostControllerImpl implements PostController {
 
   @Override
   public void deleteById(UUID id) {
-    log.info("deleteById(): PostUUID :{}", id);
+    log.info("deleteById(): PostId :{}", id);
     postService.deleteById(id);
   }
 
   @Override
-  public ResponseEntity<CommentDto> createSubComment(CommentDto commentDto, UUID uuid, UUID commentUUID) {
-    return ResponseEntity.ok(commentService.createSubComment(commentDto, uuid, commentUUID));
+  public ResponseEntity<CommentDto> createSubComment(CommentDto commentDto, UUID id,
+      UUID commentId) {
+    return ResponseEntity.ok(commentService.createSubComment(commentDto, id, commentId));
   }
 
   @Override
-  public ResponseEntity<CommentDto> deleteComment(UUID uuid, UUID commentUUID) {
-    commentService.deleteComment(uuid, commentUUID);
+  public ResponseEntity<CommentDto> deleteComment(UUID id, UUID commentId) {
+    commentService.deleteComment(id, commentId);
     return ResponseEntity.ok().build();
   }
 
   @Override
-  public ResponseEntity<Page<CommentDto>> getComment(UUID uuid, Pageable page) {
-    return ResponseEntity.ok(commentService.getComments(uuid, page));
+  public ResponseEntity<Page<CommentDto>> getComment(UUID id, Pageable page) {
+    return ResponseEntity.ok(commentService.getComments(id, page));
   }
 
   @Override
-  public ResponseEntity<CommentDto> createComment(UUID uuid, CommentDto commentDto) {
-    return ResponseEntity.ok(commentService.createComment(commentDto, uuid));
+  public ResponseEntity<CommentDto> createComment(UUID id, CommentDto commentDto) {
+    return ResponseEntity.ok(commentService.createComment(commentDto, id));
   }
 
   @Override
-  public ResponseEntity<Page<CommentDto>> getSubComment(UUID uuid, UUID commentUUID, Pageable page) {
-    return ResponseEntity.ok(commentService.getSubComments(uuid, commentUUID, page));
+  public ResponseEntity<Page<CommentDto>> getSubComment(UUID id, UUID commentId, Pageable page) {
+    return ResponseEntity.ok(commentService.getSubComments(id, commentId, page));
   }
 
 }
