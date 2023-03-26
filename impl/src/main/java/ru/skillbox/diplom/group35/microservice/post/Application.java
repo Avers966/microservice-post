@@ -14,6 +14,7 @@ import ru.skillbox.diplom.group35.library.core.annotation.EnableBaseRepository;
 @EnableBaseRepository
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class,
     ManagementWebSecurityAutoConfiguration.class})
+
 public class Application {
 
   public static void main(String[] args) {
