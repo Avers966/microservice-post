@@ -11,18 +11,18 @@ import java.util.function.Supplier;
 public class CommentSpecification {
     public final Specification EMPTY_SPECIFICATION = (root, query, criteriaBuilder) -> null;
 
-    public <T, V> Specification<T> equal(SingularAttribute<T, V> field, V value, boolean isSkipNullValues) {
+    public static <T, V> Specification<T> equal(SingularAttribute<T, V> field, V value, boolean isSkipNullValues) {
         return nullValueCheck(value, isSkipNullValues, () -> ((root, query, builder) -> {
             query.distinct(true);
             return builder.equal(root.get(field), value);
         }));
     }
 
-    public <T, V> Specification<T> nullValueCheck(V value, boolean isSkipNullValues, Supplier<Specification<T>> specificationSupplier) {
+    public static  <T, V> Specification<T> nullValueCheck(V value, boolean isSkipNullValues, Supplier<Specification<T>> specificationSupplier) {
         return value == null && isSkipNullValues ? EMPTY_SPECIFICATION : (Specification) specificationSupplier.get();
     }
 
-    public  Specification getBaseSpecification(BaseSearchDto searchDto) {
+    public static Specification getBaseSpecification(BaseSearchDto searchDto) {
         return equal(BaseEntity_.id, searchDto.getId(), true)
                 .and(equal(BaseEntity_.isDeleted, searchDto.getIsDeleted(), true));
     }

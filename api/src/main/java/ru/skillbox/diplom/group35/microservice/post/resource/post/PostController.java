@@ -17,8 +17,8 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
   ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable);
 
   @Override
-  @GetMapping("/{uuid}")
-  ResponseEntity<PostDto> getById(@PathVariable(name = "uuid") UUID id);
+  @GetMapping("/{id}")
+  ResponseEntity<PostDto> getById(@PathVariable(name = "id") UUID id);
 
   @Override
   @PostMapping
@@ -29,23 +29,23 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
   ResponseEntity<PostDto> update(@RequestBody PostDto postDto);
 
   @Override
-  @DeleteMapping(value = "/{uuid}")
-  void deleteById(@PathVariable(name = "uuid") UUID id);
+  @DeleteMapping(value = "/{id}")
+  void deleteById(@PathVariable(name = "id") UUID id);
 
-  @PutMapping(value = "/{uuid}/comment/{commentUUID}")
+  @PutMapping(value = "/{id}/comment/{commentId}")
   ResponseEntity<CommentDto> createSubComment(@RequestBody CommentDto commentDto,
-                                              @PathVariable UUID uuid,
-                                              @PathVariable UUID commentUUID);
+                                              @PathVariable UUID id,
+                                              @PathVariable UUID commentId);
 
-  @DeleteMapping(value = "/{uuid}/comment/{commentUUID}")
-  ResponseEntity<CommentDto> deleteComment(@PathVariable UUID uuid, @PathVariable UUID commentUUID);
+  @DeleteMapping(value = "/{id}/comment/{commentId}")
+  ResponseEntity<CommentDto> deleteComment(@PathVariable UUID id, @PathVariable UUID commentId);
 
-  @GetMapping(value = "/{uuid}/comment")
-  ResponseEntity<Page<CommentDto>> getComment(@PathVariable UUID uuid, Pageable page);
+  @GetMapping(value = "/{id}/comment")
+  ResponseEntity<Page<CommentDto>> getComment(@PathVariable UUID id, Pageable page);
 
-  @PostMapping(value = "/{uuid}/comment")
-  ResponseEntity<CommentDto> createComment(@PathVariable UUID uuid, @RequestBody CommentDto commentDto);
+  @PostMapping(value = "/{id}/comment")
+  ResponseEntity<CommentDto> createComment(@PathVariable UUID id, @RequestBody CommentDto commentDto);
 
-  @GetMapping(value = "/{uuid}/comment/{commentUUID}/subcomment")
-  ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID uuid, @PathVariable UUID commentUUID, Pageable page);
+  @GetMapping(value = "/{id}/comment/{commentId}/subcomment")
+  ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID id, @PathVariable UUID commentId, Pageable page);
 }

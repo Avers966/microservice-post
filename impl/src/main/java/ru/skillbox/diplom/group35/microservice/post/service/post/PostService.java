@@ -26,7 +26,7 @@ public class PostService {
   private final PostMapper postMapper;
 
   public PostDto getById(UUID id) {
-    log.info("getById(): PostUUID :{}", id);
+    log.info("getById(): PostId :{}", id);
     Optional<Post> finder = postRepository.findById(id);
     log.info("getById():  findById:{}", finder);
     return finder.map(postMapper::toPostDto).orElse(null);
@@ -47,7 +47,7 @@ public class PostService {
   }
 
   public void deleteById(UUID id) {
-    log.info("deleteById(): PostUUID :{}", id);
+    log.info("deleteById(): PostId :{}", id);
     postRepository.deleteById(id);
   }
 }
