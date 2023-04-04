@@ -27,11 +27,11 @@ import ru.skillbox.diplom.group35.library.core.model.base.BaseEntity;
 @NoArgsConstructor
 public class Post extends BaseEntity {
 
-  @Column(name = "created_time", columnDefinition = "timestamp with time zone", nullable = false)
-  private ZonedDateTime createdTime;
+  @Column(name = "time", columnDefinition = "timestamp with time zone", nullable = false)
+  private ZonedDateTime time;
 
-  @Column(name = "changed_time", columnDefinition = "timestamp with time zone")
-  private ZonedDateTime changedTime;
+  @Column(name = "time_changed", columnDefinition = "timestamp with time zone")
+  private ZonedDateTime timeChanged;
 
   @Column(name = "author_id", columnDefinition = "uuid", nullable = false)
   private UUID authorId;
@@ -47,7 +47,7 @@ public class Post extends BaseEntity {
   private String postText;
 
   @Column(name = "is_blocked", columnDefinition = "boolean", nullable = false)
-  private boolean isBlocked;
+  private Boolean isBlocked;
 
   @Column(name = "comments_count", columnDefinition = "integer")
   private Integer commentsCount;
@@ -59,12 +59,12 @@ public class Post extends BaseEntity {
   @Column(name = "like_amount", columnDefinition = "integer")
   private Integer likeAmount;
 
-  @Column(name = "my_like", columnDefinition = "boolean", nullable = false)
-  private boolean myLike;
+  @Column(name = "my_like", columnDefinition = "boolean")
+  private Boolean myLike;
 
   @Column(name = "image_path", columnDefinition = "varchar(255)")
   private String imagePath;
 
-  @Column(name = "publish_date", columnDefinition = "timestamp with time zone", nullable = false)
+  @Column(name = "publish_date", columnDefinition = "timestamp with time zone")
   private ZonedDateTime publishDate;
 }

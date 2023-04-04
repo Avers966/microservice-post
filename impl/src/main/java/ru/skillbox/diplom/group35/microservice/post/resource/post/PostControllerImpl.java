@@ -1,12 +1,20 @@
 package ru.skillbox.diplom.group35.microservice.post.resource.post;
 
+import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import ru.skillbox.diplom.group35.library.core.annotation.EnableExceptionHandler;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
@@ -21,40 +29,56 @@ import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 @Slf4j
 @RestController
+@EnableExceptionHandler
 @RequiredArgsConstructor
 public class PostControllerImpl implements PostController {
 
-  final CommentService commentService;
+  private final CommentService commentService;
   private final PostService postService;
+
+  public static UUID getUserId() {
+    UUID id = null;
+    Base64.Decoder decoder = Base64.getUrlDecoder();
+    HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(
+        RequestContextHolder.getRequestAttributes())).getRequest();
+    String token = request.getHeader("Authorization").replace("Bearer ", "");
+    try {
+      JSONObject payload = new JSONObject(new String(decoder.decode(token.split("\\.")[1])));
+      String idFromToken = payload.getString("id");
+      id = UUID.fromString(idFromToken);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return id;
+  }
 
   @Override
   public ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable) {
-    return null;
+    log.info("getAll(): postSearchDto:{}, pageable:{}", postSearchDto, pageable);
+    return ResponseEntity.ok(postService.getAll(postSearchDto, pageable));
   }
 
   @Override
   public ResponseEntity<PostDto> getById(UUID id) {
-    log.info("getById(): PostId :{}", id);
-    return (postService.getById(id) != null) ? ResponseEntity.ok(postService.getById(id))
-        : ResponseEntity.badRequest().build();
+    log.info("getById(): id :{}", id);
+    return ResponseEntity.ok(postService.getById(id));
   }
 
   @Override
   public ResponseEntity<PostDto> create(PostDto postDto) {
-    log.info("create(): PostDto:{}", postDto);
+    log.info("create(): postDto:{}", postDto);
     return ResponseEntity.ok(postService.create(postDto));
   }
 
   @Override
   public ResponseEntity<PostDto> update(PostDto postDto) {
-    log.info("update():  PostDto:{}", postDto);
-    return (postService.update(postDto) != null) ? ResponseEntity.ok(postService.update(postDto))
-        : ResponseEntity.badRequest().build();
+    log.info("update():  postDto:{}", postDto);
+    return ResponseEntity.ok(postService.update(postDto));
   }
 
   @Override
   public void deleteById(UUID id) {
-    log.info("deleteById(): PostId :{}", id);
+    log.info("deleteById(): id :{}", id);
     postService.deleteById(id);
   }
 

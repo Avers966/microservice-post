@@ -23,7 +23,7 @@ public class PostSearchDto extends BaseSearchDto {
   private List<UUID> accountIds;
   private List<UUID> blockedIds;
   private String author;
-  private boolean withFriends;
+  private Boolean withFriends;
   private Set<String> tags = new TreeSet<>();
   private ZonedDateTime dateFrom;
   private ZonedDateTime dateTo;
