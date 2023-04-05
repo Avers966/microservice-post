@@ -40,6 +40,15 @@ spring:
         default_schema: post
     open-in-view: false
 
+  cache:
+    type: simple
+  redis.host: redis
+  data:
+    redis:
+      repositories.enabled: false
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
 logging:
   level:
     org.springframework: info
