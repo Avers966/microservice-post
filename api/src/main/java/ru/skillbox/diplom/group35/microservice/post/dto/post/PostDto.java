@@ -2,7 +2,6 @@ package ru.skillbox.diplom.group35.microservice.post.dto.post;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,7 +31,7 @@ public class PostDto extends BaseDto {
   private String postText;
   private Boolean isBlocked;
   private Integer commentsCount;
-  private Set<String> tags = new TreeSet<>();
+  private Set<TagDto> tags;
   private Integer likeAmount;
   private Boolean myLike;
   private String imagePath;

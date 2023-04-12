@@ -1,13 +1,14 @@
 package ru.skillbox.diplom.group35.microservice.post.resource.post;
 
+import com.nimbusds.jose.util.JSONObjectUtils;
+import java.text.ParseException;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -43,10 +44,10 @@ public class PostControllerImpl implements PostController {
         RequestContextHolder.getRequestAttributes())).getRequest();
     String token = request.getHeader("Authorization").replace("Bearer ", "");
     try {
-      JSONObject payload = new JSONObject(new String(decoder.decode(token.split("\\.")[1])));
-      String idFromToken = payload.getString("id");
-      id = UUID.fromString(idFromToken);
-    } catch (JSONException e) {
+      Map<String, Object> payload = JSONObjectUtils.parse(
+          new String(decoder.decode(token.split("\\.")[1])));
+      id = UUID.fromString(payload.get("id").toString());
+    } catch (ParseException e) {
       e.printStackTrace();
     }
     return id;

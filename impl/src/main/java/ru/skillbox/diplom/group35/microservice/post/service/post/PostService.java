@@ -21,6 +21,7 @@ import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
 import ru.skillbox.diplom.group35.microservice.post.model.post.PostType;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post_;
 import ru.skillbox.diplom.group35.microservice.post.repository.post.PostRepository;
+import ru.skillbox.diplom.group35.microservice.post.repository.post.TagRepository;
 import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
 
 /**
@@ -35,6 +36,7 @@ import ru.skillbox.diplom.group35.microservice.post.resource.post.PostController
 public class PostService {
 
   private final PostRepository postRepository;
+  private final TagRepository tagRepository;
   private final PostMapper postMapper;
 
   public static Specification<Post> getSpecByAllFields(PostSearchDto searchDto) {
@@ -61,12 +63,14 @@ public class PostService {
 
   public PostDto create(PostDto postDto) {
     log.info("create(): postDto:{}", postDto);
-
-    postDto.setAuthorId(PostControllerImpl.getUserId()); //id from token
-
+    if (postDto.getAuthorId() == null) {
+      postDto.setAuthorId(PostControllerImpl.getUserId()); //id from token
+    }
     postDto.setTime(ZonedDateTime.now());
     postDto.setType(postDto.getPublishDate() == null ? PostType.POSTED : PostType.QUEUED);
-    return postMapper.toPostDto(postRepository.save(postMapper.toPost(postDto)));
+    Post post = postMapper.toPost(postDto);
+    post.getTags().stream().filter(t -> t.getId() == null).forEach(tagRepository::save);
+    return postMapper.toPostDto(postRepository.save(post));
   }
 
   public PostDto update(PostDto postDto) {

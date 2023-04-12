@@ -7,5 +7,6 @@
 
   <include file="v0.1_01_initial_schema.xml" relativeToChangelogFile="true"/>
   <include file="v0.1_01_initial_schema_comments.xml" relativeToChangelogFile="true"/>
+  <include file="v0.1_03_create_table_tags.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
