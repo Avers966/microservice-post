@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.TagDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.TagSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.post.TagMapper;
+import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
 import ru.skillbox.diplom.group35.microservice.post.repository.post.TagRepository;
 
 /**
@@ -30,6 +31,10 @@ public class TagService {
     log.info("getAdviceTags(): tagSearchDto:{}", tagSearchDto);
     Pageable topFive = PageRequest.of(0, 5);
     return tagMapper.toTagDtoList(tagRepository.findAdviceTags(tagSearchDto.getName(), topFive));
+  }
+
+  public void saveTags(Post post) {
+    post.getTags().stream().filter(t -> t.getId() == null).forEach(tagRepository::save);
   }
 
 }
