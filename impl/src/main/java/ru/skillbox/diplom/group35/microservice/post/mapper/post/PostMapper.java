@@ -5,6 +5,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import ru.skillbox.diplom.group35.library.core.dto.statistic.StatisticPerDateDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.StatisticPerDate;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
 
@@ -22,4 +24,8 @@ public interface PostMapper {
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
   Post updatePostFromDto(PostDto postDto, @MappingTarget Post post);
+
+  @Mapping(source = "date", target = "date", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  StatisticPerDateDto convertToStatisticPerDateDto(StatisticPerDate statPerDate);
+
 }
