@@ -8,24 +8,13 @@ import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment;
 @Mapper
 public interface CommentMapper {
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "isDeleted", source = "isDeleted")
-    @Mapping(target = "imagePath", source = "imagePath")
-    @Mapping(target = "time", source = "time")
-    @Mapping(target = "likeAmount", source = "likeAmount")
-    @Mapping(target = "commentsCount", source = "commentsCount")
-    @Mapping(target = "myLike", source = "myLike")
-    @Mapping(target = "isBlocked", source = "isBlocked")
-    @Mapping(target = "authorId", source = "authorId")
     CommentDto convertToDto(Comment comment);
     @Mapping(target = "id", source = "id")
     @Mapping(target = "isDeleted", constant = "false")
     @Mapping(target = "imagePath", constant = "")
-    @Mapping(target = "time", source = "time")
-    @Mapping(target = "likeAmount", source = "likeAmount")
-    @Mapping(target = "commentsCount", source = "commentsCount")
-    @Mapping(target = "commentText", constant = "")
-    @Mapping(target = "myLike", source = "myLike")
-    @Mapping(target = "isBlocked", source = "isBlocked")
-    @Mapping(target = "authorId", source = "authorId")
+    @Mapping(target = "likeAmount", constant = "0")
+    @Mapping(target = "commentsCount", constant = "0")
+    @Mapping(target = "myLike", constant = "false")
+    @Mapping(target = "isBlocked", constant = "false")
     Comment convertToEntity(CommentDto commentDto);
 }

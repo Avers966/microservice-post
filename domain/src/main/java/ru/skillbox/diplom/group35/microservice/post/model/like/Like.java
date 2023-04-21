@@ -2,10 +2,11 @@ package ru.skillbox.diplom.group35.microservice.post.model.like;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import ru.skillbox.diplom.group35.library.core.model.base.BaseEntity;
 //import ru.skillbox.diplom.group35.microservice.post.model.comment.CommentType;
@@ -20,18 +21,19 @@ import ru.skillbox.diplom.group35.library.core.model.base.BaseEntity;
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor
+@Table(name = "like")
+@RequiredArgsConstructor
 public class Like extends BaseEntity {
-//
-//  @Column(name = "author_id", columnDefinition = "uuid", nullable = false)
-//  private UUID authorId;
-//
-//  @Column(name = "created_time", columnDefinition = "timestamp with time zone", nullable = false)
-//  private ZonedDateTime createdTime;
-//
-//  @Column(name = "item_id", columnDefinition = "uuid", nullable = false)
-//  private UUID itemId;
-//
-//  @Column(name = "type", columnDefinition = "varchar(255)", nullable = false)
-//  private CommentType type;
+
+  @Column(name = "author_id", columnDefinition = "uuid", nullable = false)
+  private UUID authorId;
+
+  @Column(name = "time", columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
+  private ZonedDateTime time;
+
+  @Column(name = "item_id", columnDefinition = "uuid", nullable = false)
+  private UUID itemId;
+
+  @Enumerated(EnumType.STRING)
+  private LikeType type;
 }
