@@ -1,26 +1,29 @@
 package ru.skillbox.diplom.group35.microservice.post.service.comment;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentType;
+import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.comment.CommentMapper;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment_;
 import ru.skillbox.diplom.group35.microservice.post.repository.comment.CommentRepository;
+import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
+import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static ru.skillbox.diplom.group35.microservice.post.specification.CommentSpecification.equal;
-import static ru.skillbox.diplom.group35.microservice.post.specification.CommentSpecification.getBaseSpecification;
+import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.equal;
+import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.getBaseSpecification;
 
 @Slf4j
 @Service
@@ -29,20 +32,26 @@ import static ru.skillbox.diplom.group35.microservice.post.specification.Comment
 public class CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepository commentRepository;
+    private final PostService postService;
 
     public CommentDto createComment(CommentDto commentDto, UUID id) {
 
         log.info("CreateComment: PostId: {} Comment: {}", id, commentDto);
         commentDto.setPostId(id);
         if (commentDto.getParentId() != null) {
-            commentDto.setCommentType(CommentType.COMMENT);
             Optional<Comment> optionalParentComment = commentRepository.findById(commentDto.getParentId());
+            commentDescription(commentDto, commentDto.getParentId(), CommentType.COMMENT);
             Comment parentComment;
             if (optionalParentComment.isPresent()) {
                 parentComment = optionalParentComment.get();
                 parentComment.setCommentsCount(parentComment.getCommentsCount() + 1);
                 commentRepository.save(parentComment);
             }
+        } else {
+            PostDto postDto = postService.getById(id);
+            postDto.setCommentsCount(postDto.getCommentsCount() + 1);
+            postService.update(postDto);
+            commentDescription(commentDto, id, CommentType.POST);
         }
         Comment comment = commentRepository.save(commentMapper.convertToEntity(commentDto));
         log.info("CreateComment: Comment: {}", commentDto);
@@ -61,7 +70,6 @@ public class CommentService {
             subComment.setTimeChanged(ZonedDateTime.now());
         }
         log.info("CreateSubComment(): add SubComment: " + subComment);
-        assert subComment != null;
         return commentMapper.convertToDto(commentRepository.save(subComment));
     }
 
@@ -76,19 +84,23 @@ public class CommentService {
     public void deleteComment(UUID id, UUID commentId) {
 
         log.info("DeleteComment(): PostId: {} CommentId: {}", id, commentId);
-        Optional<Comment> optionalParentComment = commentRepository.findById(commentId);
-        UUID parentCommentUUID = null;
-        Comment parentComment;
-        if (optionalParentComment.isPresent()) {
-            parentComment = optionalParentComment.get();
-            parentCommentUUID = parentComment.getParentId();
+        Optional<Comment> optionalComment = commentRepository.findById(commentId);
+        if (optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            if (comment.getParentId() != null) {
+                Optional<Comment> optionalParentComment = commentRepository.findById(comment.getParentId());
+                if (optionalParentComment.isPresent()) {
+                    Comment parentComment = optionalParentComment.get();
+                    parentComment.setCommentsCount(parentComment.getCommentsCount() - 1);
+                    commentRepository.save(parentComment);
+                }
+            } else {
+                PostDto postDto = postService.getById(id);
+                postDto.setCommentsCount(postDto.getCommentsCount() - 1);
+                postService.update(postDto);
+            }
         }
-        if (parentCommentUUID != null) {
-            parentComment = commentRepository.findById(parentCommentUUID).orElseThrow();
-            parentComment.setCommentsCount(parentComment.getCommentsCount() - 1);
-            commentRepository.save(parentComment);
-        }
-        commentRepository.delete(commentRepository.findById(commentId).orElseThrow());
+        commentRepository.deleteById(commentId);
     }
 
     public Page<CommentDto> getSubComments(UUID id, UUID commentId, Pageable page) {
@@ -103,6 +115,14 @@ public class CommentService {
     private Specification<Comment> getSpecification(CommentSearchDto searchDto) {
         return getBaseSpecification(searchDto)
                         .and(equal(Comment_.postId, searchDto.getPostId(), true)
-                        .and(equal(Comment_.parentId, searchDto.getParentId(), true)));
+                        .and(equal(Comment_.parentId, searchDto.getParentId(), true))
+                                .and(equal(Comment_.parentId, searchDto.getParentId(), true)));
+    }
+
+    public void commentDescription (CommentDto commentDto, UUID id, CommentType commentType) {
+        commentDto.setAuthorId(PostControllerImpl.getUserId());
+ //       commentDto.setParentId(id);
+        commentDto.setTime(ZonedDateTime.now());
+        commentDto.setCommentType(commentType);
     }
 }

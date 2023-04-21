@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.diplom.group35.library.core.controller.BaseController;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 @RequestMapping(value = "/api/v1/post")
@@ -48,4 +49,16 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
 
   @GetMapping(value = "/{id}/comment/{commentId}/subcomment")
   ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID id, @PathVariable UUID commentId, Pageable page);
+
+  @PostMapping(value = "/{id}/like")
+  ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id);
+
+  @DeleteMapping(value = "/{id}/like")
+  ResponseEntity<LikeDto> deletePostLike(@PathVariable UUID id);
+
+  @PostMapping(value = "/{id}/comment/{commentId}/like")
+  ResponseEntity<LikeDto> createCommentLike(@PathVariable UUID id, @PathVariable UUID commentId);
+
+  @DeleteMapping(value = "/{id}/comment/{commentId}/like")
+  ResponseEntity<LikeDto> deleteCommentLike(@PathVariable UUID id, @PathVariable UUID commentId);
 }
