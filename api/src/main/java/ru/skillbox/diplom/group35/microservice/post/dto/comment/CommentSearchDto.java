@@ -1,13 +1,12 @@
 package ru.skillbox.diplom.group35.microservice.post.dto.comment;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import ru.skillbox.diplom.group35.library.core.dto.base.BaseSearchDto;
+import ru.skillbox.diplom.group35.microservice.post.model.comment.CommentType;
 
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 public class CommentSearchDto extends BaseSearchDto {
 
     private CommentType commentType;
@@ -17,14 +16,16 @@ public class CommentSearchDto extends BaseSearchDto {
     private UUID parentId;
 
     private UUID postId;
-    public CommentSearchDto(UUID postId, CommentType commentType) {
+
+    public CommentSearchDto(UUID id, CommentType commentType) {
         this.commentType = commentType;
-        this.postId = postId;
+        this.postId = id;
+
     }
 
-    public CommentSearchDto(UUID postId, UUID parentId, CommentType commentType) {
+    public CommentSearchDto(UUID id, UUID commentId, CommentType commentType) {
         this.commentType = commentType;
-        this.parentId = parentId;
-        this.postId = postId;
+        this.postId = id;
+        this.parentId = commentId;
     }
 }
