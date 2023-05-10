@@ -2,13 +2,12 @@ package ru.skillbox.diplom.group35.microservice.post.dto.comment;
 
 import lombok.*;
 import ru.skillbox.diplom.group35.library.core.dto.base.BaseDto;
+import ru.skillbox.diplom.group35.microservice.post.model.comment.CommentType;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CommentDto extends BaseDto {
 
     private CommentType commentType;

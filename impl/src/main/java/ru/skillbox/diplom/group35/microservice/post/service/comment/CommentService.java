@@ -8,10 +8,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
-import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentType;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.comment.CommentMapper;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment;
+import ru.skillbox.diplom.group35.microservice.post.model.comment.CommentType;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment_;
 import ru.skillbox.diplom.group35.microservice.post.repository.comment.CommentRepository;
 import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
@@ -40,7 +40,7 @@ public class CommentService {
         commentDto.setPostId(id);
         if (commentDto.getParentId() != null) {
             Optional<Comment> optionalParentComment = commentRepository.findById(commentDto.getParentId());
-            commentDescription(commentDto, commentDto.getParentId(), CommentType.COMMENT);
+            commentDescription(commentDto, CommentType.COMMENT);
             Comment parentComment;
             if (optionalParentComment.isPresent()) {
                 parentComment = optionalParentComment.get();
@@ -51,7 +51,7 @@ public class CommentService {
             PostDto postDto = postService.getById(id);
             postDto.setCommentsCount(postDto.getCommentsCount() + 1);
             postService.update(postDto);
-            commentDescription(commentDto, id, CommentType.POST);
+            commentDescription(commentDto, CommentType.POST);
         }
         Comment comment = commentRepository.save(commentMapper.convertToEntity(commentDto));
         log.info("CreateComment: Comment: {}", commentDto);
@@ -115,13 +115,12 @@ public class CommentService {
     private Specification<Comment> getSpecification(CommentSearchDto searchDto) {
         return getBaseSpecification(searchDto)
                         .and(equal(Comment_.postId, searchDto.getPostId(), true)
-                        .and(equal(Comment_.parentId, searchDto.getParentId(), true))
-                                .and(equal(Comment_.parentId, searchDto.getParentId(), true)));
+                        .and(equal(Comment_.commentType, searchDto.getCommentType(), true))
+                        .and(equal(Comment_.parentId, searchDto.getParentId(), true)));
     }
 
-    public void commentDescription (CommentDto commentDto, UUID id, CommentType commentType) {
+    public void commentDescription (CommentDto commentDto, CommentType commentType) {
         commentDto.setAuthorId(PostControllerImpl.getUserId());
- //       commentDto.setParentId(id);
         commentDto.setTime(ZonedDateTime.now());
         commentDto.setCommentType(commentType);
     }

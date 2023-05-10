@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import ru.skillbox.diplom.group35.library.core.model.base.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -18,7 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class Comment extends BaseEntity {
 
-    @Column(name = "comment_type")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "comment_type", columnDefinition = "varchar(255)")
     private CommentType commentType;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")

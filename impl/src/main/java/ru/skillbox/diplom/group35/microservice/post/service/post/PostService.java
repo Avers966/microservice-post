@@ -6,6 +6,7 @@ import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.in
 import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.notIn;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.criteria.Join;
@@ -15,7 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.skillbox.diplom.group35.microservice.account.api.client.AccountFeignClient;
+import ru.skillbox.diplom.group35.microservice.friend.feignclient.FriendFeignClient;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.post.PostMapper;
@@ -41,7 +46,7 @@ public class PostService {
   private final PostRepository postRepository;
   private final TagService tagService;
   private final PostMapper postMapper;
-
+  private final FriendFeignClient friendFeignClient;
   public static Specification<Post> getSpecByAllFields(PostSearchDto searchDto) {
     return getBaseSpecification(searchDto)
         .and(in(Post_.id, searchDto.getIds(), true))
@@ -55,7 +60,7 @@ public class PostService {
 
   private static Specification<Post> containsTags(Set<String> tags) {
     return (root, query, builder) -> {
-      if (tags == null) {
+      if (tags == null || tags.isEmpty()) {
         return builder.conjunction();
       }
       Join<Post, Tag> join = root.join(Post_.tags);
@@ -65,6 +70,29 @@ public class PostService {
 
   public Page<PostDto> getAll(PostSearchDto searchDto, Pageable pageable) {
     log.info("getAll(): searchDto:{}, pageable:{}", searchDto, pageable);
+
+    ResponseEntity<List<UUID>> responseAboutFriends = friendFeignClient.getFriendId();
+    ResponseEntity<List<UUID>> responseAboutBlocked = friendFeignClient.getBlockFriendId();
+
+    if (responseAboutFriends.getStatusCode().equals(HttpStatus.OK) &&
+        responseAboutBlocked.getStatusCode().equals(HttpStatus.OK)) {
+
+      List<UUID> listFriends = responseAboutFriends.getBody();
+      listFriends.add(PostControllerImpl.getUserId());
+      List<UUID> listBlocked = responseAboutBlocked.getBody();
+
+      if (!listBlocked.isEmpty()) {
+        searchDto.setBlockedIds(listBlocked);
+      }
+      if (searchDto.getWithFriends() != null) {
+        searchDto.setAccountIds(listFriends);
+      }
+    }
+
+    if (searchDto.getDateTo() == null) {
+      searchDto.setDateTo(ZonedDateTime.now());
+    }
+
     Page<Post> result = postRepository.findAll(getSpecByAllFields(searchDto), pageable);
     return result.map(postMapper::toPostDto);
   }
@@ -83,7 +111,7 @@ public class PostService {
     postDto.setTime(ZonedDateTime.now());
     postDto.setType(postDto.getPublishDate() != null ? PostType.QUEUED : PostType.POSTED);
     Post post = postMapper.toPost(postDto);
-    tagService.saveTags(post);
+    post.setTags(tagService.saveTags(post));
     return postMapper.toPostDto(postRepository.save(post));
   }
 
