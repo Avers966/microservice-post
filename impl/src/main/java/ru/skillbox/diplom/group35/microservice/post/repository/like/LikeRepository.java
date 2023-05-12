@@ -10,5 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface LikeRepository extends BaseRepository<Like> {
-    Optional<Like> findByTypeAndItemId(LikeType type, UUID itemId);
+    Optional<Like> findByTypeAndItemIdAndAuthorId(LikeType type, UUID itemId, UUID authorId);
 }

@@ -39,19 +39,18 @@ public class LikeService {
     public LikeDto createLike(UUID itemId, LikeType likeType) {
 
         log.info("ItemId in createLike(LikeService): " + itemId);
-        Optional<Like> optionalLike = likeRepository.findByTypeAndItemId(likeType, itemId);
-        Like like;
-        if (optionalLike.isEmpty()) {
-            like = new Like();
-            like.setAuthorId(PostControllerImpl.getUserId());
+        Optional<Like> optionalLike = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId,
+                                                                        PostControllerImpl.getUserId());
+        Like like = optionalLike.isEmpty() ? new Like() : optionalLike.get();
+        if(like.getId() == null || like.getIsDeleted()) {
             like.setType(likeType);
             like.setItemId(itemId);
+            like.setAuthorId(PostControllerImpl.getUserId());
             like.setIsDeleted(false);
             like.setTime(ZonedDateTime.now());
             likeAmount(itemId, likeType, 1);
-        } else {
-            like = optionalLike.get();
         }
+
         log.info("Like in createLike(LikeService): " + like);
         return likeMapper.convertToDto(likeRepository.save(like));
     }
@@ -59,11 +58,14 @@ public class LikeService {
     public void deleteLike(UUID itemId, LikeType likeType) {
 
         log.info("ItemId in deleteLike(LikeService): " + itemId);
-        Optional<Like> optionalLike = likeRepository.findByTypeAndItemId(likeType, itemId);
+        Optional<Like> optionalLike = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId,
+                                                                PostControllerImpl.getUserId());
         if(optionalLike.isPresent()) {
             Like like = optionalLike.get();
-            likeAmount(itemId, likeType, -1);
-            likeRepository.deleteById(like.getId());
+            if(like.getId() != null || !like.getIsDeleted()) {
+                likeAmount(itemId, likeType, -1);
+                likeRepository.deleteById(like.getId());
+            }
         }
     }
 
