@@ -7,7 +7,7 @@
     <changeSet id="create-table-comment" author="Vladimir Polochanin">
         <createTable tableName="comment">
             <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false" unique="true" primaryKey="true"/>
             </column>
             <column name="is_deleted" type="BOOLEAN">
             </column>
