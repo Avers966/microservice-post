@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.diplom.group35.library.core.controller.BaseController;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
@@ -41,14 +42,20 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
   @DeleteMapping(value = "/{id}/comment/{commentId}")
   ResponseEntity<CommentDto> deleteComment(@PathVariable UUID id, @PathVariable UUID commentId);
 
-  @GetMapping(value = "/{id}/comment")
-  ResponseEntity<Page<CommentDto>> getComment(@PathVariable UUID id, Pageable page);
+  @GetMapping(value = "/{postId}/comment")
+  ResponseEntity<Page<CommentDto>> getComment(@PathVariable UUID postId, CommentSearchDto searchDto, Pageable page);
 
   @PostMapping(value = "/{id}/comment")
   ResponseEntity<CommentDto> createComment(@PathVariable UUID id, @RequestBody CommentDto commentDto);
+  @PutMapping(value = "/{id}/comment")
+  ResponseEntity<CommentDto> updateComment(@PathVariable UUID id,
+                                           @RequestBody CommentDto commentDto);
 
-  @GetMapping(value = "/{id}/comment/{commentId}/subcomment")
-  ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID id, @PathVariable UUID commentId, Pageable page);
+  @GetMapping(value = "/{postId}/comment/{commentId}/subcomment")
+  ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID postId,
+                                                 @PathVariable UUID commentId,
+                                                                CommentSearchDto searchDto,
+                                                                Pageable page);
 
   @PostMapping(value = "/{id}/like")
   ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id);
