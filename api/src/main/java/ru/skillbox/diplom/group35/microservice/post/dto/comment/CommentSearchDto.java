@@ -16,16 +16,4 @@ public class CommentSearchDto extends BaseSearchDto {
     private UUID parentId;
 
     private UUID postId;
-
-    public CommentSearchDto(UUID id, CommentType commentType) {
-        this.commentType = commentType;
-        this.postId = id;
-
-    }
-
-    public CommentSearchDto(UUID id, UUID commentId, CommentType commentType) {
-        this.commentType = commentType;
-        this.postId = id;
-        this.parentId = commentId;
-    }
 }

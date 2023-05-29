@@ -58,6 +58,19 @@ public class CommentService {
         return commentMapper.convertToDto(comment);
     }
 
+    public CommentDto updateComment(CommentDto commentDto, UUID id) {
+        Optional<Comment> optionalComment = commentRepository.findById(commentDto.getId());
+        Comment comment = null;
+        if (optionalComment.isPresent()) {
+            comment = optionalComment.get();
+            comment.setCommentText(commentDto.getCommentText());
+            comment.setPostId(id);
+            comment.setTimeChanged(ZonedDateTime.now());
+        }
+        return commentMapper.convertToDto(commentRepository.save(comment));
+    }
+
+
     public CommentDto createSubComment(CommentDto commentDto, UUID id, UUID commentId) {
 
         log.info("CreateSubComment(): PostId: {} CommentId: {} UpdateComment: {}", id, commentId, commentDto);
@@ -73,10 +86,10 @@ public class CommentService {
         return commentMapper.convertToDto(commentRepository.save(subComment));
     }
 
-    public Page<CommentDto> getComments(UUID id, Pageable page) {
-        log.info("GetComments(): CommentId: {} Pageable: {}", id, page);
-        Page<Comment> commentPage = commentRepository.findAll(getSpecification(
-                                    new CommentSearchDto(id, CommentType.POST)), page);
+    public Page<CommentDto> getComments(UUID postId, CommentSearchDto searchDto, Pageable page) {
+        log.info("GetComments(): CommentId: {} Pageable: {}", postId, page);
+        searchDto.setCommentType(CommentType.POST);
+        Page<Comment> commentPage = commentRepository.findAll(getSpecification(searchDto), page);
         log.info("GetComments(): All Comments: " + commentPage);
         return commentPage.map(commentMapper::convertToDto);
     }
@@ -103,11 +116,12 @@ public class CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    public Page<CommentDto> getSubComments(UUID id, UUID commentId, Pageable page) {
+    public Page<CommentDto> getSubComments(UUID postId, UUID commentId, CommentSearchDto searchDto, Pageable page) {
 
-        log.info("GetSubComments: PostId: {} CommentId: {} Pageable: {}", id, commentId, page);
-        Page<Comment> commentPage = commentRepository.findAll(getSpecification(
-                            new CommentSearchDto(id, commentId, CommentType.COMMENT)), page);
+        log.info("GetSubComments: PostId: {} CommentId: {} Pageable: {}", postId, commentId, page);
+        searchDto.setParentId(commentId);
+        searchDto.setCommentType(CommentType.COMMENT);
+        Page<Comment> commentPage = commentRepository.findAll(getSpecification(searchDto), page);
         log.info("GetSubComments: PageOfComments: " + commentPage);
         return commentPage.map(commentMapper::convertToDto);
     }

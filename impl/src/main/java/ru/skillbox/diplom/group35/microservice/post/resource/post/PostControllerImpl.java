@@ -17,6 +17,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.skillbox.diplom.group35.library.core.annotation.EnableExceptionHandler;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
@@ -100,8 +101,8 @@ public class PostControllerImpl implements PostController {
   }
 
   @Override
-  public ResponseEntity<Page<CommentDto>> getComment(UUID id, Pageable page) {
-    return ResponseEntity.ok(commentService.getComments(id, page));
+  public ResponseEntity<Page<CommentDto>> getComment(UUID postId, CommentSearchDto searchDto, Pageable page) {
+    return ResponseEntity.ok(commentService.getComments(postId, searchDto, page));
   }
 
   @Override
@@ -110,13 +111,17 @@ public class PostControllerImpl implements PostController {
   }
 
   @Override
-  public ResponseEntity<Page<CommentDto>> getSubComment(UUID id, UUID commentId, Pageable page) {
-    return ResponseEntity.ok(commentService.getSubComments(id, commentId, page));
+  public ResponseEntity<Page<CommentDto>> getSubComment(UUID postId, UUID commentId, CommentSearchDto searchDto, Pageable page) {
+    return ResponseEntity.ok(commentService.getSubComments(postId, commentId, searchDto, page));
   }
 
   @Override
   public ResponseEntity<LikeDto> createPostLike(UUID id) {
     return ResponseEntity.ok(likeService.createLike(id, LikeType.POST));
+  }
+  @Override
+  public ResponseEntity<CommentDto> updateComment(UUID id, CommentDto commentDto) {
+    return ResponseEntity.ok(commentService.updateComment(commentDto, id));
   }
 
   @Override
