@@ -3,8 +3,6 @@ package ru.skillbox.diplom.group35.microservice.post.resource.post;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentStatisticRequestDto;
-import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeStatisticRequestDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostStatisticRequestDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.StatisticResponseDto;
 
@@ -20,7 +18,7 @@ public interface StatisticController {
     ResponseEntity<StatisticResponseDto> getPostStatistic(PostStatisticRequestDto requestDto);
 
     @GetMapping("/comment")
-    ResponseEntity<StatisticResponseDto> getCommentStatistic(CommentStatisticRequestDto requestDto);
+    ResponseEntity<StatisticResponseDto> getCommentStatistic(PostStatisticRequestDto requestDto);
     @GetMapping("/like")
-    ResponseEntity<StatisticResponseDto> getLikeStatistic(LikeStatisticRequestDto requestDto);
+    ResponseEntity<StatisticResponseDto> getLikeStatistic(PostStatisticRequestDto requestDto);
 }

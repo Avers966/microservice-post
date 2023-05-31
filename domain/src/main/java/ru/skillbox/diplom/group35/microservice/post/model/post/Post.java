@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import ru.skillbox.diplom.group35.library.core.model.base.BaseEntity;
+import ru.skillbox.diplom.group35.microservice.post.model.like.Like;
 
 
 /**

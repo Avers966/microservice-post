@@ -11,19 +11,14 @@ import ru.skillbox.diplom.group35.microservice.post.model.like.Like;
  * @author Marat Safagareev
  */
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface LikeMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "isDeleted", source = "isDeleted")
-    @Mapping(target = "time", source = "time")
-    @Mapping(target = "itemId", source = "itemId")
-    @Mapping(target = "authorId", source = "authorId")
     LikeDto convertToDto(Like like);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "isDeleted", constant = "false")
-    @Mapping(target = "time", source = "time")
-    @Mapping(target = "itemId", source = "itemId")
-    @Mapping(target = "authorId", source = "authorId")
+    @Mapping(target = "time", expression = "java(java.time.ZonedDateTime.now())")
     Like convertToEntity(LikeDto likeDto);
 }

@@ -44,4 +44,12 @@ public class TagService {
     return tagSet;
   }
 
+  public Set<TagDto> getTags(Set<Tag> tagSet) {
+    Set<TagDto> tags = new HashSet<>();
+    for (Tag tag : tagSet) {
+      tags.add(tagMapper.toTagDto(tag));
+    }
+    return tags;
+  }
+
 }

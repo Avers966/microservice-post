@@ -20,6 +20,8 @@
             <column name="item_id" type="UUID">
                 <constraints nullable="false" />
             </column>
+            <column name="reaction_type" type="VARCHAR(255)">
+            </column>
         </createTable>
     </changeSet>
 

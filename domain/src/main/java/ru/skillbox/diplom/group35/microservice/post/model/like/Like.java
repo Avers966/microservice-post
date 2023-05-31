@@ -36,4 +36,7 @@ public class Like extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   private LikeType type;
+
+  @Column(name = "reaction_type", columnDefinition = "varchar(255)")
+  private String reactionType;
 }
