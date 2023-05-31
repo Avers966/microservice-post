@@ -40,6 +40,20 @@ spring:
         default_schema: post
     open-in-view: false
 
+  cache:
+    type: simple
+  redis.host: redis
+  data:
+    redis:
+      repositories.enabled: false
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+  kafka:
+    consumer:
+      group-id: event.1
+    bootstrap-servers: 82.202.214.42:9094
+
 logging:
   level:
     org.springframework: info

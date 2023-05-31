@@ -25,3 +25,8 @@ spring:
         format_sql: true
         default_schema: ${DB_SCHEMA:post}
     open-in-view: false
+
+  kafka:
+    consumer:
+      group-id: event.1
+    bootstrap-servers: 82.202.214.42:9094

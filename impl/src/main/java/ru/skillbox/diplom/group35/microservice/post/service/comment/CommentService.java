@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
+import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
@@ -34,6 +37,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
 
+    private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
+
     public CommentDto createComment(CommentDto commentDto, UUID id) {
 
         log.info("CreateComment: PostId: {} Comment: {}", id, commentDto);
@@ -54,6 +59,7 @@ public class CommentService {
             commentDescription(commentDto, CommentType.POST);
         }
         Comment comment = commentRepository.save(commentMapper.convertToEntity(commentDto));
+        createAndSendNotification(comment, NotificationType.POST_COMMENT);
         log.info("CreateComment: Comment: {}", commentDto);
         return commentMapper.convertToDto(comment);
     }
@@ -67,9 +73,19 @@ public class CommentService {
             comment.setPostId(id);
             comment.setTimeChanged(ZonedDateTime.now());
         }
+        log.info("UpdateComment: Comment: {}", commentDto);
         return commentMapper.convertToDto(commentRepository.save(comment));
     }
 
+    public void createAndSendNotification(Comment comment, NotificationType type) {
+        EventNotificationDto notification = new EventNotificationDto();
+        notification.setAuthorId(comment.getAuthorId());
+        notification.setReceiverId(postService.getById(comment.getPostId()).getAuthorId());
+        notification.setNotificationType(String.valueOf(type));
+        notification.setContent(comment.getCommentText().length() < 20 ?
+                comment.getCommentText() : comment.getCommentText().substring(0, 25) + "...");
+        kafkaTemplate.send("event", "event", notification);
+    }
 
     public CommentDto createSubComment(CommentDto commentDto, UUID id, UUID commentId) {
 
