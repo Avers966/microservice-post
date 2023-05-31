@@ -2,7 +2,10 @@ package ru.skillbox.diplom.group35.microservice.post.service.like;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
+import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
 import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.like.LikeMapper;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment;
@@ -13,6 +16,7 @@ import ru.skillbox.diplom.group35.microservice.post.repository.comment.CommentRe
 import ru.skillbox.diplom.group35.microservice.post.repository.like.LikeRepository;
 import ru.skillbox.diplom.group35.microservice.post.repository.post.PostRepository;
 import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
+import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
@@ -36,6 +40,8 @@ public class LikeService {
     private final CommentRepository commentRepository;
     private final LikeMapper likeMapper;
 
+    private final PostService postService;
+    private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
     public LikeDto createLike(UUID itemId, LikeType likeType) {
 
         log.info("ItemId in createLike(LikeService): " + itemId);
@@ -50,9 +56,18 @@ public class LikeService {
             like.setTime(ZonedDateTime.now());
             likeAmount(itemId, likeType, 1);
         }
-
+        createAndSendNotification(like, NotificationType.LIKE);
         log.info("Like in createLike(LikeService): " + like);
         return likeMapper.convertToDto(likeRepository.save(like));
+    }
+
+    public void createAndSendNotification(Like like, NotificationType type) {
+        EventNotificationDto notification = new EventNotificationDto();
+        notification.setAuthorId(like.getAuthorId());
+        notification.setReceiverId(postService.getById(like.getItemId()).getAuthorId());
+        notification.setNotificationType(String.valueOf(type));
+        notification.setContent("понравилась ваша запись");
+        kafkaTemplate.send("event", "event", notification);
     }
 
     public void deleteLike(UUID itemId, LikeType likeType) {

@@ -18,9 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ru.skillbox.diplom.group35.microservice.account.api.client.AccountFeignClient;
+import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
 import ru.skillbox.diplom.group35.microservice.friend.feignclient.FriendFeignClient;
+import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.post.PostMapper;
@@ -47,6 +49,7 @@ public class PostService {
   private final TagService tagService;
   private final PostMapper postMapper;
   private final FriendFeignClient friendFeignClient;
+  private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
   public static Specification<Post> getSpecByAllFields(PostSearchDto searchDto) {
     return getBaseSpecification(searchDto)
         .and(in(Post_.id, searchDto.getIds(), true))
@@ -104,7 +107,6 @@ public class PostService {
 
   public PostDto create(PostDto postDto) {
     log.info("create(): postDto:{}", postDto);
-
     if (postDto.getAuthorId() == null) {
       postDto.setAuthorId(PostControllerImpl.getUserId()); //id from token
     }
@@ -112,7 +114,17 @@ public class PostService {
     postDto.setType(postDto.getPublishDate() != null ? PostType.QUEUED : PostType.POSTED);
     Post post = postMapper.toPost(postDto);
     post.setTags(tagService.saveTags(post));
+    createAndSendNotification(post, NotificationType.POST);
     return postMapper.toPostDto(postRepository.save(post));
+  }
+
+  public void createAndSendNotification(Post post, NotificationType type) {
+    EventNotificationDto notification = new EventNotificationDto();
+    notification.setAuthorId(post.getAuthorId());
+    notification.setReceiverId(null);
+    notification.setNotificationType(String.valueOf(type));
+    notification.setContent(post.getTitle());
+    kafkaTemplate.send("event", "event", notification);
   }
 
   public PostDto update(PostDto postDto) {
