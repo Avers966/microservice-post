@@ -36,3 +36,13 @@ logging:
     org.springframework.web: info
     org.hibernate: error
     ru.skillbox: info
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: '/api/v1/post/v3/api-docs'
+  swagger-ui:
+    path: '/api/v1/post/swagger-ui'
+    doc-expansion: none
+    disable-swagger-default-url: true
+
