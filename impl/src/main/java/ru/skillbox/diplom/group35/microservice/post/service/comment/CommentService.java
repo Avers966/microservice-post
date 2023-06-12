@@ -41,17 +41,12 @@ public class CommentService {
 
     public CommentDto createComment(CommentDto commentDto, UUID id) {
 
-        log.info("CreateComment: PostId: {} Comment: {}", id, commentDto);
         commentDto.setPostId(id);
         if (commentDto.getParentId() != null) {
-            Optional<Comment> optionalParentComment = commentRepository.findById(commentDto.getParentId());
+            Comment parentComment = commentRepository.findById(commentDto.getParentId()).orElseThrow();
             commentDescription(commentDto, CommentType.COMMENT);
-            Comment parentComment;
-            if (optionalParentComment.isPresent()) {
-                parentComment = optionalParentComment.get();
-                parentComment.setCommentsCount(parentComment.getCommentsCount() + 1);
-                commentRepository.save(parentComment);
-            }
+            parentComment.setCommentsCount(parentComment.getCommentsCount() + 1);
+            commentRepository.save(parentComment);
         } else {
             PostDto postDto = postService.getById(id);
             postDto.setCommentsCount(postDto.getCommentsCount() + 1);
@@ -60,20 +55,14 @@ public class CommentService {
         }
         Comment comment = commentRepository.save(commentMapper.convertToEntity(commentDto));
         createAndSendNotification(comment, NotificationType.POST_COMMENT);
-        log.info("CreateComment: Comment: {}", commentDto);
         return commentMapper.convertToDto(comment);
     }
 
     public CommentDto updateComment(CommentDto commentDto, UUID id) {
-        Optional<Comment> optionalComment = commentRepository.findById(commentDto.getId());
-        Comment comment = null;
-        if (optionalComment.isPresent()) {
-            comment = optionalComment.get();
-            comment.setCommentText(commentDto.getCommentText());
-            comment.setPostId(id);
-            comment.setTimeChanged(ZonedDateTime.now());
-        }
-        log.info("UpdateComment: Comment: {}", commentDto);
+        Comment comment = commentRepository.findById(commentDto.getId()).orElseThrow();
+        comment.setCommentText(commentDto.getCommentText());
+        comment.setPostId(id);
+        comment.setTimeChanged(ZonedDateTime.now());
         return commentMapper.convertToDto(commentRepository.save(comment));
     }
 
@@ -89,7 +78,6 @@ public class CommentService {
 
     public CommentDto createSubComment(CommentDto commentDto, UUID id, UUID commentId) {
 
-        log.info("CreateSubComment(): PostId: {} CommentId: {} UpdateComment: {}", id, commentId, commentDto);
         Optional<Comment> subCommentOptional = commentRepository.findById(commentId);
         Comment subComment = null;
         if (subCommentOptional.isPresent()) {
@@ -98,21 +86,17 @@ public class CommentService {
             subComment.setCommentText(commentDto.getCommentText());
             subComment.setTimeChanged(ZonedDateTime.now());
         }
-        log.info("CreateSubComment(): add SubComment: " + subComment);
         return commentMapper.convertToDto(commentRepository.save(subComment));
     }
 
     public Page<CommentDto> getComments(UUID postId, CommentSearchDto searchDto, Pageable page) {
-        log.info("GetComments(): CommentId: {} Pageable: {}", postId, page);
         searchDto.setCommentType(CommentType.POST);
         Page<Comment> commentPage = commentRepository.findAll(getSpecification(searchDto), page);
-        log.info("GetComments(): All Comments: " + commentPage);
         return commentPage.map(commentMapper::convertToDto);
     }
 
     public void deleteComment(UUID id, UUID commentId) {
 
-        log.info("DeleteComment(): PostId: {} CommentId: {}", id, commentId);
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
@@ -134,7 +118,6 @@ public class CommentService {
 
     public Page<CommentDto> getSubComments(UUID postId, UUID commentId, CommentSearchDto searchDto, Pageable page) {
 
-        log.info("GetSubComments: PostId: {} CommentId: {} Pageable: {}", postId, commentId, page);
         searchDto.setParentId(commentId);
         searchDto.setCommentType(CommentType.COMMENT);
         Page<Comment> commentPage = commentRepository.findAll(getSpecification(searchDto), page);

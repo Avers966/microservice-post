@@ -34,9 +34,7 @@ public class DelayedPostService {
   protected void publishPost() {
     List<Post> postsToPublish = postRepository
         .findAllByTypeAndPublishDateBefore(PostType.QUEUED, ZonedDateTime.now());
-    log.info("Checking database for queued posts, " + postsToPublish.size() + " posts found.");
     postsToPublish.forEach(post -> {
-      log.info("publishPost(): post:{}", post);
       post.setTime(post.getPublishDate());
       post.setPublishDate(null);
       post.setType(PostType.POSTED);

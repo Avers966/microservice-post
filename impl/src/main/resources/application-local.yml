@@ -56,7 +56,9 @@ spring:
 
 logging:
   level:
-    org.springframework: info
+    org.springframework.web: info
+    org.hibernate: error
+    ru: info
   file:
     name: application.log
   logback:

@@ -58,7 +58,7 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
                                                                 Pageable page);
 
   @PostMapping(value = "/{id}/like")
-  ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id);
+  ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id, @RequestBody LikeDto likeDto);
 
   @DeleteMapping(value = "/{id}/like")
   ResponseEntity<LikeDto> deletePostLike(@PathVariable UUID id);

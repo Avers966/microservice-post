@@ -60,31 +60,26 @@ public class PostControllerImpl implements PostController {
 
   @Override
   public ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable) {
-    log.info("getAll(): postSearchDto:{}, pageable:{}", postSearchDto, pageable);
     return ResponseEntity.ok(postService.getAll(postSearchDto, pageable));
   }
 
   @Override
   public ResponseEntity<PostDto> getById(UUID id) {
-    log.info("getById(): id :{}", id);
     return ResponseEntity.ok(postService.getById(id));
   }
 
   @Override
   public ResponseEntity<PostDto> create(PostDto postDto) {
-    log.info("create(): postDto:{}", postDto);
     return ResponseEntity.ok(postService.create(postDto));
   }
 
   @Override
   public ResponseEntity<PostDto> update(PostDto postDto) {
-    log.info("update():  postDto:{}", postDto);
     return ResponseEntity.ok(postService.update(postDto));
   }
 
   @Override
   public void deleteById(UUID id) {
-    log.info("deleteById(): id :{}", id);
     postService.deleteById(id);
   }
 
@@ -114,14 +109,13 @@ public class PostControllerImpl implements PostController {
   public ResponseEntity<Page<CommentDto>> getSubComment(UUID postId, UUID commentId, CommentSearchDto searchDto, Pageable page) {
     return ResponseEntity.ok(commentService.getSubComments(postId, commentId, searchDto, page));
   }
-
-  @Override
-  public ResponseEntity<LikeDto> createPostLike(UUID id) {
-    return ResponseEntity.ok(likeService.createLike(id, LikeType.POST));
-  }
   @Override
   public ResponseEntity<CommentDto> updateComment(UUID id, CommentDto commentDto) {
     return ResponseEntity.ok(commentService.updateComment(commentDto, id));
+  }
+  @Override
+  public ResponseEntity<LikeDto> createPostLike(UUID id, LikeDto likeDto) {
+    return ResponseEntity.ok(likeService.createLike(id, likeDto, LikeType.POST));
   }
 
   @Override
@@ -132,13 +126,11 @@ public class PostControllerImpl implements PostController {
 
   @Override
   public ResponseEntity<LikeDto> createCommentLike(UUID id, UUID commentId) {
-    return ResponseEntity.ok(likeService.createLike(commentId, LikeType.COMMENT));
+    return ResponseEntity.ok(likeService.createLike(commentId, new LikeDto(), LikeType.COMMENT));
   }
-
   @Override
   public ResponseEntity<LikeDto> deleteCommentLike(UUID id, UUID commentId) {
     likeService.deleteLike(commentId, LikeType.COMMENT);
     return ResponseEntity.ok().build();
   }
-
 }
