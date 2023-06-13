@@ -2,6 +2,7 @@ package ru.skillbox.diplom.group35.microservice.post.service.like;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
@@ -19,9 +20,7 @@ import ru.skillbox.diplom.group35.microservice.post.resource.post.PostController
 import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 import javax.transaction.Transactional;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * LikeService
@@ -42,66 +41,57 @@ public class LikeService {
 
     private final PostService postService;
     private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
-    public LikeDto createLike(UUID itemId, LikeType likeType) {
+    public LikeDto createLike(UUID itemId, LikeDto likeDto, LikeType likeType) {
 
-        log.info("ItemId in createLike(LikeService): " + itemId);
-        Optional<Like> optionalLike = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId,
-                                                                        PostControllerImpl.getUserId());
-        Like like = optionalLike.isEmpty() ? new Like() : optionalLike.get();
-        if(like.getId() == null || like.getIsDeleted()) {
-            like.setType(likeType);
+        Like like = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId, PostControllerImpl.getUserId())
+                                                            .orElse(new Like());
+        if (like.getId() == null) {
+            like = likeMapper.convertToEntity(likeDto);
             like.setItemId(itemId);
-            like.setAuthorId(PostControllerImpl.getUserId());
-            like.setIsDeleted(false);
-            like.setTime(ZonedDateTime.now());
+            like.setType(likeType);
+            likeAmount(itemId, likeType, 1);
+        } else if (like.getIsDeleted()) {
+            like.setIsDeleted(!like.getIsDeleted());
             likeAmount(itemId, likeType, 1);
         }
         createAndSendNotification(like, NotificationType.LIKE);
-        log.info("Like in createLike(LikeService): " + like);
         return likeMapper.convertToDto(likeRepository.save(like));
     }
 
     public void createAndSendNotification(Like like, NotificationType type) {
         EventNotificationDto notification = new EventNotificationDto();
         notification.setAuthorId(like.getAuthorId());
-        notification.setReceiverId(postService.getById(like.getItemId()).getAuthorId());
+        notification.setReceiverId(like.getType() == LikeType.POST ? postService.getById(like.getItemId()).getAuthorId() :
+                                                                    commentRepository.getById(like.getItemId()).getAuthorId());
         notification.setNotificationType(String.valueOf(type));
-        notification.setContent("понравилась ваша запись");
+        notification.setContent(like.getType() == LikeType.POST ? "понравился ваш пост" : "понравился ваш комментарий");
         kafkaTemplate.send("event", "event", notification);
     }
 
     public void deleteLike(UUID itemId, LikeType likeType) {
 
-        log.info("ItemId in deleteLike(LikeService): " + itemId);
-        Optional<Like> optionalLike = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId,
-                                                                PostControllerImpl.getUserId());
-        if(optionalLike.isPresent()) {
-            Like like = optionalLike.get();
-            if(like.getId() != null || !like.getIsDeleted()) {
-                likeAmount(itemId, likeType, -1);
-                likeRepository.deleteById(like.getId());
-            }
+        Like like = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId, PostControllerImpl.getUserId())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Like not found for this " + likeType.toString().toLowerCase() +  "Id :: " + itemId));
+        if (like.getId() != null || !like.getIsDeleted()) {
+            likeAmount(itemId, likeType, -1);
+            likeRepository.deleteById(like.getId());
         }
+
     }
 
     private void likeAmount(UUID itemId, LikeType type, int one) {
 
         if (type.equals(LikeType.POST)) {
-                Optional<Post> optionalPost = postRepository.findById(itemId);
-                if (optionalPost.isPresent()) {
-                    Post post = optionalPost.get();
-                    post.setLikeAmount(post.getLikeAmount() + one);
-                    postRepository.save(post);
-                    log.info("LikeService in changeLikeAmount: likeAmount changed for " + type + " id - " + post.getId());
-                }
+            Post post = postRepository.findById(itemId).orElseThrow();
+            post.setLikeAmount(post.getLikeAmount() + one);
+            postRepository.save(post);
+            log.info("LikeService in changeLikeAmount: likeAmount changed for " + type + " id - " + post.getId());
         } else {
-                Optional<Comment> optionalComment = commentRepository.findById(itemId);
-                if (optionalComment.isPresent()) {
-                    Comment comment = optionalComment.get();
-                    comment.setLikeAmount(comment.getLikeAmount() + one);
-                    commentRepository.save(comment);
-                    log.info("LikeService in changeLikeAmount: likeAmount changed for " + type + " id - " + comment.getId());
-                }
-            }
+            Comment comment = commentRepository.findById(itemId).orElseThrow();
+            comment.setLikeAmount(comment.getLikeAmount() + one);
+            commentRepository.save(comment);
+            log.info("LikeService in changeLikeAmount: likeAmount changed for " + type + " id - " + comment.getId());
         }
+    }
 }

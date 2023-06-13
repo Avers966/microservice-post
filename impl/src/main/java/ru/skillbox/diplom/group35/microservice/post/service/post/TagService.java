@@ -31,7 +31,6 @@ public class TagService {
   private final TagMapper tagMapper;
 
   public List<TagDto> getAdviceTags(TagSearchDto tagSearchDto) {
-    log.info("getAdviceTags(): tagSearchDto:{}", tagSearchDto);
     Pageable topFive = PageRequest.of(0, 5);
     return tagMapper.toTagDtoList(tagRepository.findAdviceTags(tagSearchDto.getName(), topFive));
   }

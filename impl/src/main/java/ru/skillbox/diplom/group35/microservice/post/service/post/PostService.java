@@ -72,7 +72,6 @@ public class PostService {
   }
 
   public Page<PostDto> getAll(PostSearchDto searchDto, Pageable pageable) {
-    log.info("getAll(): searchDto:{}, pageable:{}", searchDto, pageable);
 
     ResponseEntity<List<UUID>> responseAboutFriends = friendFeignClient.getFriendId();
     ResponseEntity<List<UUID>> responseAboutBlocked = friendFeignClient.getBlockFriendId();
@@ -101,12 +100,11 @@ public class PostService {
   }
 
   public PostDto getById(UUID id) {
-    log.info("getById(): postId :{}", id);
     return postMapper.toPostDto(postRepository.getById(id));
   }
 
   public PostDto create(PostDto postDto) {
-    log.info("create(): postDto:{}", postDto);
+
     if (postDto.getAuthorId() == null) {
       postDto.setAuthorId(PostControllerImpl.getUserId()); //id from token
     }
@@ -128,7 +126,6 @@ public class PostService {
   }
 
   public PostDto update(PostDto postDto) {
-    log.info("update():  postDto:{}", postDto);
     Post post = postRepository.getById(postDto.getId());
     post = postMapper.updatePostFromDto(postDto, post);
     tagService.saveTags(post);
@@ -136,7 +133,6 @@ public class PostService {
   }
 
   public void deleteById(UUID id) {
-    log.info("deleteById(): postId :{}", id);
     postRepository.deleteById(id);
   }
 }
