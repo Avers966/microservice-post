@@ -6,14 +6,13 @@ import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.in
 import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.notIn;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import javax.persistence.criteria.Join;
+import java.util.*;
+import javax.persistence.criteria.*;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -21,18 +20,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
+import ru.skillbox.diplom.group35.library.core.utils.SecurityUtil;
 import ru.skillbox.diplom.group35.microservice.friend.feignclient.FriendFeignClient;
 import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.post.PostMapper;
+import ru.skillbox.diplom.group35.microservice.post.model.like.Like;
+import ru.skillbox.diplom.group35.microservice.post.model.like.LikeType;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
 import ru.skillbox.diplom.group35.microservice.post.model.post.PostType;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post_;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Tag;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Tag_;
+import ru.skillbox.diplom.group35.microservice.post.repository.like.LikeRepository;
 import ru.skillbox.diplom.group35.microservice.post.repository.post.PostRepository;
-import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
 
 /**
  * PostService
@@ -47,8 +49,12 @@ public class PostService {
 
   private final PostRepository postRepository;
   private final TagService tagService;
+
+  private final LikeRepository likeRepository;
   private final PostMapper postMapper;
   private final FriendFeignClient friendFeignClient;
+
+  private final SecurityUtil securityUtil;
   private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
   public static Specification<Post> getSpecByAllFields(PostSearchDto searchDto) {
     return getBaseSpecification(searchDto)
@@ -66,8 +72,13 @@ public class PostService {
       if (tags == null || tags.isEmpty()) {
         return builder.conjunction();
       }
-      Join<Post, Tag> join = root.join(Post_.tags);
-      return builder.in(join.get(Tag_.NAME)).value(tags);
+      Path<UUID> ids = root.get(Post_.ID);
+      Join<Post, Tag> postsTag = root.join(Post_.tags);
+      return query.multiselect(postsTag)
+              .where(builder.in(postsTag.get(Tag_.NAME)).value(tags))
+              .groupBy(ids)
+              .having(builder.equal(builder.count(ids), tags.size()))
+              .getRestriction();
     };
   }
 
@@ -80,7 +91,7 @@ public class PostService {
         responseAboutBlocked.getStatusCode().equals(HttpStatus.OK)) {
 
       List<UUID> listFriends = responseAboutFriends.getBody();
-      listFriends.add(PostControllerImpl.getUserId());
+      listFriends.add(securityUtil.getAccountDetails().getId());
       List<UUID> listBlocked = responseAboutBlocked.getBody();
 
       if (!listBlocked.isEmpty()) {
@@ -94,9 +105,19 @@ public class PostService {
     if (searchDto.getDateTo() == null) {
       searchDto.setDateTo(ZonedDateTime.now());
     }
-
     Page<Post> result = postRepository.findAll(getSpecByAllFields(searchDto), pageable);
-    return result.map(postMapper::toPostDto);
+    return new PageImpl<>(result.map(this::getPostDto).toList(), pageable, result.getTotalElements());
+  }
+
+  public PostDto getPostDto(Post post) {
+    PostDto postDto = postMapper.toPostDto(post);
+    postDto.setReactions(new HashSet<>(likeRepository.findReactions(post.getId())));
+    postDto.setTags(tagService.getTags(post.getTags()));
+    Like like = likeRepository.findByTypeAndItemIdAndAuthorId(
+                              LikeType.POST, post.getId(), securityUtil.getAccountDetails().getId()).orElse(null);
+    postDto.setMyLike(like != null && !like.getIsDeleted());
+    postDto.setMyReaction(like != null ? like.getReactionType() : null);
+    return postDto;
   }
 
   public PostDto getById(UUID id) {
@@ -106,7 +127,7 @@ public class PostService {
   public PostDto create(PostDto postDto) {
 
     if (postDto.getAuthorId() == null) {
-      postDto.setAuthorId(PostControllerImpl.getUserId()); //id from token
+      postDto.setAuthorId(securityUtil.getAccountDetails().getId()); //id from token
     }
     postDto.setTime(ZonedDateTime.now());
     postDto.setType(postDto.getPublishDate() != null ? PostType.QUEUED : PostType.POSTED);

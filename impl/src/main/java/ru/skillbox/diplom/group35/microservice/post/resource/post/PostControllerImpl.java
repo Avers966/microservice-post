@@ -1,20 +1,12 @@
 package ru.skillbox.diplom.group35.microservice.post.resource.post;
 
-import com.nimbusds.jose.util.JSONObjectUtils;
-import java.text.ParseException;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.skillbox.diplom.group35.library.core.annotation.EnableExceptionHandler;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
@@ -41,22 +33,6 @@ public class PostControllerImpl implements PostController {
   private final CommentService commentService;
   private final LikeService likeService;
   private final PostService postService;
-
-  public static UUID getUserId() {
-    UUID id = null;
-    Base64.Decoder decoder = Base64.getUrlDecoder();
-    HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(
-        RequestContextHolder.getRequestAttributes())).getRequest();
-    String token = request.getHeader("Authorization").replace("Bearer ", "");
-    try {
-      Map<String, Object> payload = JSONObjectUtils.parse(
-          new String(decoder.decode(token.split("\\.")[1])));
-      id = UUID.fromString(payload.get("id").toString());
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return id;
-  }
 
   @Override
   public ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable) {

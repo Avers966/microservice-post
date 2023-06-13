@@ -11,6 +11,8 @@ import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto
 import ru.skillbox.diplom.group35.microservice.post.dto.like.LikeDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
+import ru.skillbox.diplom.group35.microservice.post.model.like.ReactionType;
+
 @RequestMapping(value = "/api/v1/post")
 public interface PostController extends BaseController<PostDto, PostSearchDto> {
 
@@ -47,6 +49,7 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
 
   @PostMapping(value = "/{id}/comment")
   ResponseEntity<CommentDto> createComment(@PathVariable UUID id, @RequestBody CommentDto commentDto);
+
   @PutMapping(value = "/{id}/comment")
   ResponseEntity<CommentDto> updateComment(@PathVariable UUID id,
                                            @RequestBody CommentDto commentDto);
@@ -54,8 +57,8 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
   @GetMapping(value = "/{postId}/comment/{commentId}/subcomment")
   ResponseEntity<Page<CommentDto>> getSubComment(@PathVariable UUID postId,
                                                  @PathVariable UUID commentId,
-                                                                CommentSearchDto searchDto,
-                                                                Pageable page);
+                                                 CommentSearchDto searchDto,
+                                                 Pageable page);
 
   @PostMapping(value = "/{id}/like")
   ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id, @RequestBody LikeDto likeDto);

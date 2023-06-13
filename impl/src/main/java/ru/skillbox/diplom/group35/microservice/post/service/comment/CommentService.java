@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
+import ru.skillbox.diplom.group35.library.core.utils.SecurityUtil;
 import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.comment.CommentSearchDto;
@@ -17,7 +18,6 @@ import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.CommentType;
 import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment_;
 import ru.skillbox.diplom.group35.microservice.post.repository.comment.CommentRepository;
-import ru.skillbox.diplom.group35.microservice.post.resource.post.PostControllerImpl;
 import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 import javax.transaction.Transactional;
@@ -37,6 +37,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
 
+    private final SecurityUtil securityUtil;
     private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
 
     public CommentDto createComment(CommentDto commentDto, UUID id) {
@@ -133,7 +134,7 @@ public class CommentService {
     }
 
     public void commentDescription (CommentDto commentDto, CommentType commentType) {
-        commentDto.setAuthorId(PostControllerImpl.getUserId());
+        commentDto.setAuthorId(securityUtil.getAccountDetails().getId());
         commentDto.setTime(ZonedDateTime.now());
         commentDto.setCommentType(commentType);
     }

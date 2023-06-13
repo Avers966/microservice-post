@@ -8,9 +8,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.skillbox.diplom.group35.library.core.dto.statistic.StatisticPerDateDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.StatisticPerDate;
 import ru.skillbox.diplom.group35.microservice.post.dto.post.PostDto;
+import ru.skillbox.diplom.group35.microservice.post.mapper.like.LikeMapper;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
 
-@Mapper(componentModel = "spring", uses = {TagMapper.class})
+@Mapper(componentModel = "spring", uses = {TagMapper.class, LikeMapper.class})
 public interface PostMapper {
 
   PostDto toPostDto(Post post);
@@ -27,5 +28,4 @@ public interface PostMapper {
 
   @Mapping(source = "date", target = "date", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   StatisticPerDateDto convertToStatisticPerDateDto(StatisticPerDate statPerDate);
-
 }

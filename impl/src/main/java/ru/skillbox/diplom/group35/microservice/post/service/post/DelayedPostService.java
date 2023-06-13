@@ -2,7 +2,6 @@ package ru.skillbox.diplom.group35.microservice.post.service.post;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
