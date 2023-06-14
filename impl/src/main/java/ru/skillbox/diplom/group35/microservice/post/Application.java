@@ -3,10 +3,7 @@ package ru.skillbox.diplom.group35.microservice.post;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import ru.skillbox.diplom.group35.library.core.annotation.EnableOpenFeign;
-import ru.skillbox.diplom.group35.library.core.annotation.EnableSecurity;
-import ru.skillbox.diplom.group35.library.core.annotation.EnableBaseRepository;
-import ru.skillbox.diplom.group35.library.core.annotation.JwtProvider;
+import ru.skillbox.diplom.group35.library.core.annotation.*;
 
 /**
  * Application
@@ -14,6 +11,7 @@ import ru.skillbox.diplom.group35.library.core.annotation.JwtProvider;
  * @author Marat Safagareev
  */
 @JwtProvider
+@EnableSwagger
 @EnableSecurity
 @EnableOpenFeign
 @EnableScheduling

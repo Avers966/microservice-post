@@ -1,5 +1,6 @@
 package ru.skillbox.diplom.group35.microservice.post.dto.post;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import ru.skillbox.diplom.group35.library.core.dto.statistic.StatisticRequestDto;
 
 /**
@@ -8,5 +9,6 @@ import ru.skillbox.diplom.group35.library.core.dto.statistic.StatisticRequestDto
  * @author Vladimir Polochanin
  */
 
+@Schema(description = "DTO для запроса статистики")
 public class PostStatisticRequestDto extends StatisticRequestDto {
 }
