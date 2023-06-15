@@ -2,11 +2,13 @@ package ru.skillbox.diplom.group35.microservice.post.service.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
 import ru.skillbox.diplom.group35.library.core.utils.SecurityUtil;
 import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
@@ -20,9 +22,7 @@ import ru.skillbox.diplom.group35.microservice.post.model.comment.Comment_;
 import ru.skillbox.diplom.group35.microservice.post.repository.comment.CommentRepository;
 import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
-import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.equal;
@@ -41,7 +41,6 @@ public class CommentService {
     private final KafkaTemplate<String, EventNotificationDto> kafkaTemplate;
 
     public CommentDto createComment(CommentDto commentDto, UUID id) {
-
         commentDto.setPostId(id);
         if (commentDto.getParentId() != null) {
             Comment parentComment = commentRepository.findById(commentDto.getParentId()).orElseThrow();
@@ -78,15 +77,11 @@ public class CommentService {
     }
 
     public CommentDto createSubComment(CommentDto commentDto, UUID id, UUID commentId) {
-
-        Optional<Comment> subCommentOptional = commentRepository.findById(commentId);
-        Comment subComment = null;
-        if (subCommentOptional.isPresent()) {
-            subComment = subCommentOptional.get();
-            subComment.setPostId(id);
-            subComment.setCommentText(commentDto.getCommentText());
-            subComment.setTimeChanged(ZonedDateTime.now());
-        }
+        Comment subComment = commentRepository.findById(commentId).orElseThrow();
+        subComment.setPostId(id);
+        subComment.setCommentText(commentDto.getCommentText());
+        subComment.setTimeChanged(ZonedDateTime.now());
+        createAndSendNotification(subComment, NotificationType.COMMENT_COMMENT);
         return commentMapper.convertToDto(commentRepository.save(subComment));
     }
 
@@ -97,28 +92,22 @@ public class CommentService {
     }
 
     public void deleteComment(UUID id, UUID commentId) {
-
-        Optional<Comment> optionalComment = commentRepository.findById(commentId);
-        if (optionalComment.isPresent()) {
-            Comment comment = optionalComment.get();
-            if (comment.getParentId() != null) {
-                Optional<Comment> optionalParentComment = commentRepository.findById(comment.getParentId());
-                if (optionalParentComment.isPresent()) {
-                    Comment parentComment = optionalParentComment.get();
-                    parentComment.setCommentsCount(parentComment.getCommentsCount() - 1);
-                    commentRepository.save(parentComment);
-                }
-            } else {
-                PostDto postDto = postService.getById(id);
-                postDto.setCommentsCount(postDto.getCommentsCount() - 1);
-                postService.update(postDto);
-            }
+        Comment comment = commentRepository.findById(commentId)
+                                            .orElseThrow(() -> new ResourceNotFoundException("Comment not found for this id :: " + commentId));
+        if (comment.getParentId() != null) {
+            Comment parentComment = commentRepository.findById(comment.getParentId())
+                                                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found for this id :: " + commentId));
+            parentComment.setCommentsCount(parentComment.getCommentsCount() - 1);
+            commentRepository.save(parentComment);
+        } else {
+            PostDto postDto = postService.getById(id);
+            postDto.setCommentsCount(postDto.getCommentsCount() - 1);
+            postService.update(postDto);
         }
         commentRepository.deleteById(commentId);
     }
 
     public Page<CommentDto> getSubComments(UUID postId, UUID commentId, CommentSearchDto searchDto, Pageable page) {
-
         searchDto.setParentId(commentId);
         searchDto.setCommentType(CommentType.COMMENT);
         Page<Comment> commentPage = commentRepository.findAll(getSpecification(searchDto), page);

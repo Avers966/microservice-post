@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.skillbox.diplom.group35.library.core.dto.base.BaseDto;
 import ru.skillbox.diplom.group35.microservice.post.dto.like.ReactionDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.tag.TagDto;
 import ru.skillbox.diplom.group35.microservice.post.model.post.PostType;
 
 

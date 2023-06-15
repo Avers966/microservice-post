@@ -12,8 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.TagDto;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.TagSearchDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.tag.TagDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.tag.TagSearchDto;
 
 /**
  * TagController

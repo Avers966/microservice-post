@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.diplom.group35.library.core.annotation.EnableExceptionHandler;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.TagDto;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.TagSearchDto;
-import ru.skillbox.diplom.group35.microservice.post.service.post.TagService;
+import ru.skillbox.diplom.group35.microservice.post.dto.tag.TagDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.tag.TagSearchDto;
+import ru.skillbox.diplom.group35.microservice.post.service.tag.TagService;
 
 /**
  * TagControllerImpl

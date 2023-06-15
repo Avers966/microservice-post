@@ -3,8 +3,9 @@ package ru.skillbox.diplom.group35.microservice.post.resource.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import ru.skillbox.diplom.group35.microservice.post.dto.StatisticResponseDto;;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.PostStatisticRequestDto;
+import org.springframework.web.bind.annotation.PutMapping;
+import ru.skillbox.diplom.group35.microservice.post.dto.statistic.StatisticResponseDto;;
+import ru.skillbox.diplom.group35.microservice.post.dto.statistic.PostStatisticRequestDto;
 
 /**
  * PostFriendClient
@@ -15,16 +16,17 @@ import ru.skillbox.diplom.group35.microservice.post.dto.post.PostStatisticReques
 @FeignClient(value = "PostFeignClient",
 //        url = "http://localhost:8080",
         url = "http://microservice-post",
-        path = "/api/v1/post/statistic")
+        path = "/api/v1/post")
 public interface PostFeignClient {
 
-    @GetMapping("/post")
+    @GetMapping("/statistic/post")
     ResponseEntity<StatisticResponseDto> getPostStatistic(PostStatisticRequestDto requestDto);
 
-    @GetMapping("/comment")
+    @GetMapping("/statistic/comment")
     ResponseEntity<StatisticResponseDto> getCommentStatistic(PostStatisticRequestDto requestDto);
-    @GetMapping("/like")
+    @GetMapping("/statistic/like")
     ResponseEntity<StatisticResponseDto> getLikeStatistic(PostStatisticRequestDto requestDto);
-
+    @PutMapping("/delayed")
+    ResponseEntity<?> getDelayedPost();
 }
 

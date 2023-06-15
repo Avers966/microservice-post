@@ -9,8 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.skillbox.diplom.group35.microservice.post.dto.post.PostStatisticRequestDto;
-import ru.skillbox.diplom.group35.microservice.post.dto.StatisticResponseDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.statistic.PostStatisticRequestDto;
+import ru.skillbox.diplom.group35.microservice.post.dto.statistic.StatisticResponseDto;
 
 /**
  * StatisticController
@@ -23,19 +23,19 @@ import ru.skillbox.diplom.group35.microservice.post.dto.StatisticResponseDto;
                 content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
 @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = ""))
 @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = ""))
-@RequestMapping("/api/v1/post/statistic")
+@RequestMapping("/api/v1/post")
 public interface StatisticController {
-    @GetMapping("/post")
+    @GetMapping("/statistic/post")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики постов")
     ResponseEntity<StatisticResponseDto> getPostStatistic(PostStatisticRequestDto requestDto);
 
-    @GetMapping("/comment")
+    @GetMapping("/statistic/comment")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики комментариев")
     ResponseEntity<StatisticResponseDto> getCommentStatistic(PostStatisticRequestDto requestDto);
 
-    @GetMapping("/like")
+    @GetMapping("/statistic/like")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики лайков")
     ResponseEntity<StatisticResponseDto> getLikeStatistic(PostStatisticRequestDto requestDto);
