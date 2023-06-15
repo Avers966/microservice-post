@@ -16,6 +16,7 @@ import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.model.like.LikeType;
 import ru.skillbox.diplom.group35.microservice.post.service.comment.CommentService;
 import ru.skillbox.diplom.group35.microservice.post.service.like.LikeService;
+import ru.skillbox.diplom.group35.microservice.post.service.post.DelayedPostService;
 import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
 /**
@@ -33,6 +34,7 @@ public class PostControllerImpl implements PostController {
   private final CommentService commentService;
   private final LikeService likeService;
   private final PostService postService;
+  private final DelayedPostService delayedPostService;
 
   @Override
   public ResponseEntity<Page<PostDto>> getAll(PostSearchDto postSearchDto, Pageable pageable) {
@@ -47,6 +49,11 @@ public class PostControllerImpl implements PostController {
   @Override
   public ResponseEntity<PostDto> create(PostDto postDto) {
     return ResponseEntity.ok(postService.create(postDto));
+  }
+
+  @Override
+  public ResponseEntity<?> getDelayedPost() {
+    return delayedPostService.publishPost();
   }
 
   @Override

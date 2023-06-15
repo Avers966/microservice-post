@@ -1,11 +1,11 @@
-package ru.skillbox.diplom.group35.microservice.post.repository.post;
+package ru.skillbox.diplom.group35.microservice.post.repository.tag;
 
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.diplom.group35.library.core.repository.BaseRepository;
-import ru.skillbox.diplom.group35.microservice.post.model.post.Tag;
+import ru.skillbox.diplom.group35.microservice.post.model.tag.Tag;
 
 /**
  * TagRepository

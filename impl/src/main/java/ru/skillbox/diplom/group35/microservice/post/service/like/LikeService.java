@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
 import ru.skillbox.diplom.group35.library.core.utils.SecurityUtil;
 import ru.skillbox.diplom.group35.microservice.notification.dto.NotificationType;
@@ -19,7 +20,6 @@ import ru.skillbox.diplom.group35.microservice.post.repository.like.LikeReposito
 import ru.skillbox.diplom.group35.microservice.post.repository.post.PostRepository;
 import ru.skillbox.diplom.group35.microservice.post.service.post.PostService;
 
-import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -76,7 +76,6 @@ public class LikeService {
     }
 
     public void deleteLike(UUID itemId, LikeType likeType) {
-
         Like like = likeRepository.findByTypeAndItemIdAndAuthorId(likeType, itemId, securityUtil.getAccountDetails().getId())
                                         .orElseThrow(() -> new ResourceNotFoundException(
                                         "Like not found for this " + likeType.toString().toLowerCase() +  "Id :: " + itemId));
@@ -88,7 +87,6 @@ public class LikeService {
     }
 
     private void likeAmount(UUID itemId, LikeType type, int one) {
-
         if (type.equals(LikeType.POST)) {
             Post post = postRepository.findById(itemId).orElseThrow();
             post.setLikeAmount(post.getLikeAmount() + one);

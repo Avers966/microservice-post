@@ -1,4 +1,4 @@
-package ru.skillbox.diplom.group35.microservice.post.dto;
+package ru.skillbox.diplom.group35.microservice.post.dto.statistic;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

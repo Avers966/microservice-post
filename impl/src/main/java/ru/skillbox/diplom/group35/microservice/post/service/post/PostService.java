@@ -8,7 +8,6 @@ import static ru.skillbox.diplom.group35.library.core.utils.SpecificationUtil.no
 import java.time.ZonedDateTime;
 import java.util.*;
 import javax.persistence.criteria.*;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.diplom.group35.library.core.dto.streaming.EventNotificationDto;
 import ru.skillbox.diplom.group35.library.core.utils.SecurityUtil;
 import ru.skillbox.diplom.group35.microservice.friend.feignclient.FriendFeignClient;
@@ -28,13 +28,12 @@ import ru.skillbox.diplom.group35.microservice.post.dto.post.PostSearchDto;
 import ru.skillbox.diplom.group35.microservice.post.mapper.post.PostMapper;
 import ru.skillbox.diplom.group35.microservice.post.model.like.Like;
 import ru.skillbox.diplom.group35.microservice.post.model.like.LikeType;
-import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
-import ru.skillbox.diplom.group35.microservice.post.model.post.PostType;
-import ru.skillbox.diplom.group35.microservice.post.model.post.Post_;
-import ru.skillbox.diplom.group35.microservice.post.model.post.Tag;
-import ru.skillbox.diplom.group35.microservice.post.model.post.Tag_;
+import ru.skillbox.diplom.group35.microservice.post.model.post.*;
+import ru.skillbox.diplom.group35.microservice.post.model.tag.Tag;
+import ru.skillbox.diplom.group35.microservice.post.model.tag.Tag_;
 import ru.skillbox.diplom.group35.microservice.post.repository.like.LikeRepository;
 import ru.skillbox.diplom.group35.microservice.post.repository.post.PostRepository;
+import ru.skillbox.diplom.group35.microservice.post.service.tag.TagService;
 
 /**
  * PostService
@@ -83,30 +82,29 @@ public class PostService {
   }
 
   public Page<PostDto> getAll(PostSearchDto searchDto, Pageable pageable) {
+    updateBlockedAndFriendsLists(searchDto);
+    if (searchDto.getDateTo() == null) {
+      searchDto.setDateTo(ZonedDateTime.now());
+    }
+    Page<Post> result = postRepository.findAll(getSpecByAllFields(searchDto), pageable);
+    return new PageImpl<>(result.map(this::getPostDto).toList(), pageable, result.getTotalElements());
+  }
 
+  public void updateBlockedAndFriendsLists(PostSearchDto searchDto) {
     ResponseEntity<List<UUID>> responseAboutFriends = friendFeignClient.getFriendId();
     ResponseEntity<List<UUID>> responseAboutBlocked = friendFeignClient.getBlockFriendId();
-
     if (responseAboutFriends.getStatusCode().equals(HttpStatus.OK) &&
-        responseAboutBlocked.getStatusCode().equals(HttpStatus.OK)) {
-
+            responseAboutBlocked.getStatusCode().equals(HttpStatus.OK)) {
       List<UUID> listFriends = responseAboutFriends.getBody();
       listFriends.add(securityUtil.getAccountDetails().getId());
       List<UUID> listBlocked = responseAboutBlocked.getBody();
-
-      if (!listBlocked.isEmpty()) {
+      if (listBlocked != null && !listBlocked.isEmpty()) {
         searchDto.setBlockedIds(listBlocked);
       }
       if (searchDto.getWithFriends() != null) {
         searchDto.setAccountIds(listFriends);
       }
     }
-
-    if (searchDto.getDateTo() == null) {
-      searchDto.setDateTo(ZonedDateTime.now());
-    }
-    Page<Post> result = postRepository.findAll(getSpecByAllFields(searchDto), pageable);
-    return new PageImpl<>(result.map(this::getPostDto).toList(), pageable, result.getTotalElements());
   }
 
   public PostDto getPostDto(Post post) {
@@ -125,18 +123,14 @@ public class PostService {
   }
 
   public PostDto create(PostDto postDto) {
-
-    if (postDto.getAuthorId() == null) {
-      postDto.setAuthorId(securityUtil.getAccountDetails().getId()); //id from token
-    }
-    postDto.setTime(ZonedDateTime.now());
-    postDto.setType(postDto.getPublishDate() != null ? PostType.QUEUED : PostType.POSTED);
+    postDto.setAuthorId(securityUtil.getAccountDetails().getId());
     Post post = postMapper.toPost(postDto);
     post.setTags(tagService.saveTags(post));
-    createAndSendNotification(post, NotificationType.POST);
+    if (post.getType().equals(PostType.POSTED)) {
+      createAndSendNotification(post, NotificationType.POST);
+    }
     return postMapper.toPostDto(postRepository.save(post));
   }
-
   public void createAndSendNotification(Post post, NotificationType type) {
     EventNotificationDto notification = new EventNotificationDto();
     notification.setAuthorId(post.getAuthorId());

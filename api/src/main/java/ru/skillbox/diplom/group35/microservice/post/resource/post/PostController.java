@@ -45,6 +45,11 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
   @Operation(description = "Создание поста")
   ResponseEntity<PostDto> create(@RequestBody PostDto postDto);
 
+  @PutMapping("/delayed")
+  @SecurityRequirement(name = "JWT")
+  @Operation(description = "Отложенный пост")
+  ResponseEntity<?> getDelayedPost();
+
   @Override
   @PutMapping
   @SecurityRequirement(name = "JWT")
@@ -92,6 +97,7 @@ public interface PostController extends BaseController<PostDto, PostSearchDto> {
                                                  @PathVariable UUID commentId,
                                                  CommentSearchDto searchDto,
                                                  Pageable page);
+  @PostMapping(value = "/{id}/like")
   @SecurityRequirement(name = "JWT")
   @Operation(description = "Создание лайка типа POST")
   ResponseEntity<LikeDto> createPostLike(@PathVariable UUID id, @RequestBody LikeDto likeDto);
