@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,15 +29,15 @@ public interface StatisticController {
     @GetMapping("/statistic/post")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики постов")
-    ResponseEntity<StatisticResponseDto> getPostStatistic(PostStatisticRequestDto requestDto);
+    ResponseEntity<StatisticResponseDto> getPostStatistic(@SpringQueryMap PostStatisticRequestDto requestDto);
 
     @GetMapping("/statistic/comment")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики комментариев")
-    ResponseEntity<StatisticResponseDto> getCommentStatistic(PostStatisticRequestDto requestDto);
+    ResponseEntity<StatisticResponseDto> getCommentStatistic(@SpringQueryMap PostStatisticRequestDto requestDto);
 
     @GetMapping("/statistic/like")
     @SecurityRequirement(name = "JWT")
     @Operation(description = "Получение статистики лайков")
-    ResponseEntity<StatisticResponseDto> getLikeStatistic(PostStatisticRequestDto requestDto);
+    ResponseEntity<StatisticResponseDto> getLikeStatistic(@SpringQueryMap PostStatisticRequestDto requestDto);
 }
