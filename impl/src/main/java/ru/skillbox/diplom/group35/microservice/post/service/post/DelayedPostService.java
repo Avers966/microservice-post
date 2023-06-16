@@ -4,8 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.diplom.group35.microservice.post.model.post.Post;
@@ -25,7 +23,7 @@ public class DelayedPostService {
 
   private final PostRepository postRepository;
 
-  public ResponseEntity<?> publishPost() {
+  public void publishPost() {
     List<Post> postsToPublish = postRepository
         .findAllByTypeAndPublishDateBefore(PostType.QUEUED, ZonedDateTime.now());
     postsToPublish.forEach(post -> {
@@ -34,6 +32,5 @@ public class DelayedPostService {
       post.setType(PostType.POSTED);
       postRepository.save(post);
     });
-    return ResponseEntity.ok().build();
   }
 }
