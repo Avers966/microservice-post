@@ -53,7 +53,8 @@ public class PostControllerImpl implements PostController {
 
   @Override
   public ResponseEntity<?> getDelayedPost() {
-    return delayedPostService.publishPost();
+    delayedPostService.publishPost();
+    return ResponseEntity.ok().build();
   }
 
   @Override
